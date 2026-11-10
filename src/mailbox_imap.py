@@ -21,6 +21,7 @@ import typing
 import collections
 import os.path
 import pickle
+import datetime
 
 from src.mailbox_message import MailboxCleanerMessage
 
@@ -347,8 +348,12 @@ class MailboxCleanerIMAP():
         # Safety net: enable read-only if requested
         self.imap.select(folder, readonly=self.args.read_only)
 
-        # Extract email UIDs
-        result_mails, data_mails = self.imap.uid('search', None, "ALL")
+        # Extract email UIDs, if not in Drafts, then older than 180 days (or what argument daysbefore is set to
+        if folder.endswith('Drafts'):
+            result_mails, data_mails = self.imap.uid('search', None, "ALL")
+        else:
+            before_date = (datetime.date.today() - datetime.timedelta(days=self.args.days_before)).strftime("%d-%b-%Y")
+            result_mails, data_mails = self.imap.uid('search', None, "ALL", f'(BEFORE {before_date})')
         msg_uids = data_mails[0].split()
         logging.warning('Mails (#)\t: %s (%s)',
                         result_mails, len(msg_uids))

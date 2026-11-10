@@ -50,6 +50,7 @@ class MailboxCleanerIMAP():
     __IGNORE_PREFIX = ('Contacts', 'Calendar', '"Calendar',
                        'Trash', '"Deleted', 'Tasks',
                        '"[Gmail]"')
+    __IGNORE_SUFFIX = ( 'Trash"' )
 
     def __init__(self, args, imap=None):
         """Initialize class."""
@@ -361,7 +362,8 @@ class MailboxCleanerIMAP():
         logging.warning('Folders (#)\t: %s (%s)', res, len(folder_list))
 
         folders = [re.split('"."|"/"', item.decode())[-1].strip()
-                   for item in folder_list]
+                   for item in folder_list
+                    if not re.split('"."|"/"', item.decode())[0].strip().endswith('Trash)')]
 
         if not self.args.all:
             if self.args.folder.lower() not in map(str.lower, folders):
@@ -374,6 +376,8 @@ class MailboxCleanerIMAP():
                           if not item.startswith(self.__IGNORE_PREFIX)]
             folders[:] = [item for item in folders
                           if not item.startswith(self.__IGNORE_PREFIX)]
+            folders[:] = [item for item in folders
+                          if not item.endswith(self.__IGNORE_SUFFIX)]
 
         return folders
 

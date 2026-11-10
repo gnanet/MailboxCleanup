@@ -48,7 +48,7 @@ The attachment was stored using the file name: "%(newfile)s".
 The original file name was: "%(filename)s".
 The original size was: %(size)d KB.
 The original type was: %(type)s.
-Tool: https://mailboxcleanup.netcee.de
+Tool: MailboxCleanup
 ===========================================================
 """
 
@@ -65,7 +65,10 @@ Tool: https://mailboxcleanup.netcee.de
             if self.is_non_detachable_part(part):
                 continue
             # Only download in relevant mode
-            date = time.mktime(email.utils.parsedate(msg.get("date")))
+            if msg.get("date") is not None:
+                date = time.mktime(email.utils.parsedate(msg.get("date")))
+            else:
+                date = time.time()
             target = self.download_attachment(part, date)
             if target is not None:
                 # Only detach in relevant mode

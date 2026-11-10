@@ -352,8 +352,11 @@ class MailboxCleanerIMAP():
         if folder.endswith('Drafts'):
             result_mails, data_mails = self.imap.uid('search', None, "ALL")
         else:
-            before_date = (datetime.date.today() - datetime.timedelta(days=self.args.days_before)).strftime("%d-%b-%Y")
-            result_mails, data_mails = self.imap.uid('search', None, "ALL", f'(BEFORE {before_date})')
+            if self.args.days_before == 0:
+                result_mails, data_mails = self.imap.uid('search', None, "ALL")
+            else:
+                before_date = (datetime.date.today() - datetime.timedelta(days=self.args.days_before)).strftime("%d-%b-%Y")
+                result_mails, data_mails = self.imap.uid('search', None, "ALL", f'(BEFORE {before_date})')
         msg_uids = data_mails[0].split()
         logging.warning('Mails (#)\t: %s (%s)',
                         result_mails, len(msg_uids))
